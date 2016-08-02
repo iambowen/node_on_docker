@@ -18,7 +18,7 @@ RUN set -ex \
 ENV NPM_CONFIG_LOGLEVEL info
 ENV NODE_VERSION 6.3.1
 
-RUN apt-get update && apt-get install curl xz-utils -y
+RUN apt-get update && apt-get install curl xz-utils bzip2 -y
 
 RUN curl -SLO "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-x64.tar.xz" \
   && curl -SLO "https://nodejs.org/dist/v$NODE_VERSION/SHASUMS256.txt.asc" \
@@ -26,5 +26,17 @@ RUN curl -SLO "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-
   && grep " node-v$NODE_VERSION-linux-x64.tar.xz\$" SHASUMS256.txt | sha256sum -c - \
   && tar -xJf "node-v$NODE_VERSION-linux-x64.tar.xz" -C /usr/local --strip-components=1 \
   && rm "node-v$NODE_VERSION-linux-x64.tar.xz" SHASUMS256.txt.asc SHASUMS256.txt
+
+
+ENV PHANTOMJS_VERSION 2.1.1
+
+RUN apt-get -y install libfreetype6 libfreetype6-dev fontconfig
+
+RUN cd /tmp && curl -LO https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-"$PHANTOMJS_VERSION"-linux-x86_64.tar.bz2 \
+    && tar -xjf /tmp/phantomjs-"$PHANTOMJS_VERSION"-linux-x86_64.tar.bz2 -C /tmp/ \
+    && mv /tmp/phantomjs-"$PHANTOMJS_VERSION"-linux-x86_64/bin/phantomjs /usr/local/bin/phantomjs
+RUN rm -rf /var/lib/cache /var/lib/log /tmp/*
+
+RUN echo '{ "allow_root": true }' > /root/.bowerrc
 
 CMD [ "node" ]
